@@ -1,0 +1,165 @@
+MainActivity:
+package com.broadcastintentandbroadcastreceiver;
+
+import android.content.Intent;
+import android.content.IntentFilter;
+import android.support.v7.app.AppCompatActivity;
+import android.os.Bundle;
+import android.view.View;
+import android.widget.Button;
+
+public class MainActivity extends AppCompatActivity {
+
+    private Button mBtnRegReceiver,
+                    mBtnUnregReceiver,
+                    mBtnSendBroadcast1,
+                    mBtnSendBroadcast2;
+
+    private MyBroadcastReceiver2 mMyReceiver2;
+
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_main);
+
+        mBtnRegReceiver = (Button)findViewById(R.id.btnRegReceiver);
+        mBtnUnregReceiver = (Button)findViewById(R.id.btnUnregReceiver);
+        mBtnSendBroadcast1 = (Button)findViewById(R.id.btnSendBroadcast1);
+        mBtnSendBroadcast2 = (Button)findViewById(R.id.btnSendBroadcast2);
+
+        mBtnRegReceiver.setOnClickListener(btnRegReceiverOnClick);
+        mBtnUnregReceiver.setOnClickListener(btnUnregReceiverOnClick);
+        mBtnSendBroadcast1.setOnClickListener(btnSendBroadcast1OnClick);
+        mBtnSendBroadcast2.setOnClickListener(btnSendBroadcast2OnClick);
+    }
+
+    private View.OnClickListener btnRegReceiverOnClick = new View.OnClickListener() {
+        public void onClick(View v) {
+            IntentFilter itFilter = new IntentFilter("com.android.MY_BROADCAST2");
+            mMyReceiver2 = new MyBroadcastReceiver2();
+            registerReceiver(mMyReceiver2, itFilter);
+        }
+    };
+
+    private View.OnClickListener btnUnregReceiverOnClick = new View.OnClickListener() {
+        public void onClick(View v) {
+            unregisterReceiver(mMyReceiver2);
+        }
+    };
+
+    private View.OnClickListener btnSendBroadcast1OnClick = new View.OnClickListener() {
+        public void onClick(View v) {
+            Intent it = new Intent("com.android.MY_BROADCAST1");
+            it.putExtra("sender_name", "MCU ITE");
+            sendBroadcast(it);
+        }
+    };
+
+    private View.OnClickListener btnSendBroadcast2OnClick = new View.OnClickListener() {
+        public void onClick(View v) {
+            Intent it = new Intent("com.android.MY_BROADCAST2");
+            it.putExtra("sender_name", "MCU ITE");
+            sendBroadcast(it);
+        }
+    };
+}
+AndriodManifest:
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    package="com.broadcastintentandbroadcastreceiver">
+
+    <application
+        android:allowBackup="true"
+        android:icon="@mipmap/ic_launcher"
+        android:label="@string/app_name"
+        android:supportsRtl="true"
+        android:theme="@style/AppTheme">
+        <activity android:name=".MainActivity">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+        <receiver android:name=".MyBroadcastReceiver1"
+            android:label="@string/app_name">
+            <intent-filter>
+                <action android:name="com.android.MY_BROADCAST1" />
+            </intent-filter>
+        </receiver>
+    </application>
+
+</manifest>
+Activity_Main:
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:paddingBottom="@dimen/activity_vertical_margin"
+    android:paddingLeft="@dimen/activity_horizontal_margin"
+    android:paddingRight="@dimen/activity_horizontal_margin"
+    android:paddingTop="@dimen/activity_vertical_margin"
+    tools:context="com.broadcastintentandbroadcastreceiver.MainActivity"
+    android:orientation="vertical">
+
+    <Button
+        android:id="@+id/btnRegReceiver"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="註冊MCU ITE訊息2"
+        android:layout_marginTop="20dp" />
+
+    <Button
+        android:id="@+id/btnUnregReceiver"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="註銷MCU ITE訊息2" />
+
+    <Button
+        android:id="@+id/btnSendBroadcast2"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="傳送MCU ITE訊息2" />
+
+    <Button
+        android:id="@+id/btnSendBroadcast1"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="傳送MCU ITE訊息1" />
+
+
+
+</LinearLayout>
+MyBoardcaseRecevier1:
+package com.broadcastintentandbroadcastreceiver;
+
+import android.content.BroadcastReceiver;
+import android.content.Context;
+import android.content.Intent;
+import android.widget.Toast;
+
+public class MyBroadcastReceiver1 extends BroadcastReceiver {
+    @Override
+    public void onReceive(Context context, Intent intent) {
+        String sender = intent.getStringExtra("sender_name");
+        Toast.makeText(context, "收到來自" + sender + "發送的訊息了",
+                Toast.LENGTH_LONG).show();
+    }
+}
+MyBoardcaseRecevier2:
+package com.broadcastintentandbroadcastreceiver;
+
+import android.content.BroadcastReceiver;
+import android.content.Context;
+import android.content.Intent;
+import android.widget.Toast;
+
+public class MyBroadcastReceiver2 extends BroadcastReceiver {
+    @Override
+    public void onReceive(Context context, Intent intent) {
+        String sender = intent.getStringExtra("sender_name");
+        Toast.makeText(context, "收到來自" + sender + "發送的訊息了",
+                Toast.LENGTH_LONG).show();
+    }
+}
