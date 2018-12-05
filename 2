@@ -1,0 +1,277 @@
+MainActivity:
+package com.service;
+
+import android.content.ComponentName;
+import android.content.DialogInterface;
+import android.content.Intent;
+import android.content.ServiceConnection;
+import android.os.IBinder;
+import android.support.v7.app.AlertDialog;
+import android.support.v7.app.AppCompatActivity;
+import android.os.Bundle;
+import android.util.Log;
+import android.view.View;
+import android.widget.Button;
+import android.widget.TextView;
+
+public class MainActivity extends AppCompatActivity {
+
+    private final String LOG_TAG = "ServiceDemo";
+
+    private Button mBtnStartMyService,
+                    mBtnStopMyService,
+                    mBtnBindMyService,
+                    mBtnUnbindMyService,
+                    mBtnCallMyServiceMethod;
+    private TextView gg;
+
+    private MyService mMyServ = null;
+
+    private ServiceConnection mServConn = new ServiceConnection() {
+        @Override
+        public void onServiceConnected(ComponentName componentName, IBinder iBinder) {
+            Log.d(LOG_TAG, "onServiceConnected() " + componentName.getClassName());
+            mMyServ = ((MyService.LocalBinder)iBinder).getService();
+        }
+
+        @Override
+        public void onServiceDisconnected(ComponentName componentName) {
+            Log.d(LOG_TAG, "onServiceDisconnected()" + componentName.getClassName());
+        }
+    };
+
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_main);
+
+        gg = (TextView) findViewById(R.id.txtResulT);
+
+        mBtnStartMyService = (Button) findViewById(R.id.btnStartMyService);
+        mBtnStopMyService = (Button) findViewById(R.id.btnStopMyService);
+        mBtnBindMyService = (Button) findViewById(R.id.btnBindMyService);
+        mBtnUnbindMyService = (Button) findViewById(R.id.btnUnbindMyService);
+        mBtnCallMyServiceMethod = (Button) findViewById(R.id.btnCallMyServiceMethod);
+
+        mBtnStartMyService.setOnClickListener(btnStartMyServiceOnClick);
+        mBtnStopMyService.setOnClickListener(btnStopMyServiceOnClick);
+        mBtnBindMyService.setOnClickListener(btnBindMyServiceOnClick);
+        mBtnUnbindMyService.setOnClickListener(btnUnbindMyServiceOnClick);
+        mBtnCallMyServiceMethod.setOnClickListener(btnCallMyServiceMethodOnClick);
+    }
+
+    private View.OnClickListener btnStartMyServiceOnClick = new View.OnClickListener() {
+        public void onClick(View v) {
+            mMyServ = null;
+            Intent it = new Intent(MainActivity.this, MyService.class);
+            startService(it);
+
+            gg.setText("");
+            AlertDialog.Builder altDlgBldr = new AlertDialog.Builder(MainActivity.this);
+            altDlgBldr.setTitle("AlertDialog設定");
+            altDlgBldr.setMessage("請確認AlertDialog是否正確!!");
+            altDlgBldr.setIcon(android.R.drawable.ic_dialog_info);
+            altDlgBldr.setCancelable(false);
+            altDlgBldr.setPositiveButton("是",
+                    new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialog, int which) {
+                            gg.setText(
+                                    "點選了是!");
+
+                        }
+                    });
+
+            altDlgBldr.setNegativeButton("否",
+                    new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialog, int which) {
+                            gg.setText(
+                                    "點選了否!");
+                        }
+                    });
+
+            altDlgBldr.show();
+        }
+    };
+
+    private View.OnClickListener btnStopMyServiceOnClick = new View.OnClickListener() {
+        public void onClick(View v) {
+            mMyServ = null;
+            Intent it = new Intent(MainActivity.this, MyService.class);
+            stopService(it);
+        }
+    };
+
+    private View.OnClickListener btnBindMyServiceOnClick = new View.OnClickListener() {
+        public void onClick(View v) {
+            mMyServ = null;
+            Intent it = new Intent(MainActivity.this, MyService.class);
+            bindService(it, mServConn, BIND_AUTO_CREATE);
+        }
+    };
+
+    private View.OnClickListener btnUnbindMyServiceOnClick = new View.OnClickListener() {
+        public void onClick(View v) {
+            mMyServ = null;
+            unbindService(mServConn);
+        }
+    };
+
+    private View.OnClickListener btnCallMyServiceMethodOnClick = new View.OnClickListener() {
+        public void onClick(View v) {
+            if (mMyServ != null)
+                mMyServ.myMethod();
+        }
+    };
+}
+AndroidManifest:
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    package="com.service">
+
+    <application
+        android:allowBackup="true"
+        android:icon="@mipmap/ic_launcher"
+        android:label="@string/app_name"
+        android:supportsRtl="true"
+        android:theme="@style/AppTheme">
+        <activity android:name=".MainActivity">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+
+        <service
+            android:name=".MyService"
+            android:enabled="true"
+            android:exported="true"></service>
+    </application>
+
+</manifest>
+Activity_main:
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:paddingBottom="@dimen/activity_vertical_margin"
+    android:paddingLeft="@dimen/activity_horizontal_margin"
+    android:paddingRight="@dimen/activity_horizontal_margin"
+    android:paddingTop="@dimen/activity_vertical_margin"
+    tools:context="com.service.MainActivity"
+    android:orientation="vertical">
+
+    <Button
+        android:id="@+id/btnStartMyService"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="啟動 MyService" />
+
+    <Button
+        android:id="@+id/btnStopMyService"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="停止 MyService" />
+
+    <Button
+        android:id="@+id/btnBindMyService"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="連結 MyService" />
+
+    <Button
+        android:id="@+id/btnUnbindMyService"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="斷開 MyService" />
+
+    <Button
+        android:id="@+id/btnCallMyServiceMethod"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="呼叫 MyService中的 myMethod()" />
+
+    <TextView android:id="@+id/txtResulT"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="15dp"/>
+
+</LinearLayout>
+MyService:
+package com.service;
+
+import android.app.Service;
+import android.content.DialogInterface;
+import android.content.Intent;
+import android.os.Binder;
+import android.os.Bundle;
+import android.os.IBinder;
+import android.support.v7.app.AlertDialog;
+import android.util.Log;
+import android.widget.TextView;
+import android.widget.Toast;
+
+import java.util.Calendar;
+
+public class MyService extends Service {
+
+    private TextView gg;
+    private final String LOG_TAG = "ServiceDemo";
+
+    /*protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_main);
+        gg = (TextView) findViewById(R.id.txtResulT);
+    }*/
+
+    public class LocalBinder extends Binder {
+        MyService getService() {
+            return  MyService.this;
+        }
+    }
+
+    private LocalBinder mLocBin = new LocalBinder();
+
+    public void myMethod() {
+        Log.d(LOG_TAG, "myMethod()");
+        Toast.makeText(MyService.this, "呼叫method（）方法成功！！", Toast.LENGTH_LONG)
+                .show();
+    }
+
+    public MyService() {
+
+    }
+
+    @Override
+    public void onCreate() {
+        Log.d(LOG_TAG, "onCreate()");
+        super.onCreate();
+    }
+
+    @Override
+    public void onDestroy() {
+        Log.d(LOG_TAG, "onDestroy()");
+        super.onDestroy();
+    }
+
+    @Override
+    public int onStartCommand(Intent intent, int flags, int startId) {
+        Log.d(LOG_TAG, "onStartCommand()");
+        return super.onStartCommand(intent, flags, startId);
+    }
+
+    @Override
+    public boolean onUnbind(Intent intent) {
+        Log.d(LOG_TAG, "onUnbind()");
+        return super.onUnbind(intent);
+    }
+
+    @Override
+    public IBinder onBind(Intent intent) {
+        Log.d(LOG_TAG, "onBind()");
+        return mLocBin;
+    }
+}
